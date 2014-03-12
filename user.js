@@ -19,33 +19,28 @@ exports.CRoom = function (id) {
     this.list = new Array();
 
     this.add = function(user) {
-        list[user.id] = user;
+        (this.list)[user.id] = user;
     }
 
     this.get = function(id) {
-        return list[id];
+        return (this.list)[id];
     }
 
     this.del = function(id) {
-        list[id] = undefined;
+        delete (this.list[id]);
     }
 
     this.send = function(message) {
         /* Construct the message */
-        var buf = new ArrayBuffer(message.length + 3);
-        var msgBuf = new m.CMessage(buf);
+        var buf = new Buffer(message.length + 3);
+        var msgBuf = new m.ChatMessage(buf);
         msgBuf.version[0] = 1 << 4; 
-        msgBuf.type[0] = 0x5;
-        msgBuf.length[0] = message.length + 3;
+        msgBuf.setHeader(0x5, message.length + 3);
         var i = 0;
-        for (var b in message) {
-            msgBuf.data[i] = message[i];
-            i++;
-        }
+        (new Buffer(message)).copy(msgBuf.content);
 
         for (var u in this.list) {
-            msgBuf.dump();
-            msgBuf.send(u.socket);
+            msgBuf.send((this.list)[u].socket, 'binary');
         }
     }
 }
