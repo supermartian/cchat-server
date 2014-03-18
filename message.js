@@ -1,4 +1,5 @@
 var util = require("util");
+var dbg = require("./dbg.js");
 var ver = 1;
 
 function ab2str(buf) {
@@ -27,7 +28,7 @@ exports.CMessage = function (buf) {
     }
 
     this.send = function(socket) {
-        console.log(Date.now() + ":-----------outgoing message----------");
+        dbg.dbg_print("-----------outgoing message----------");
         this.dump();
         /* This has to be {binary: true, mask: true}, or an error with 1007 will occur. */
         socket.send(this.buf, {binary: true, mask: true});
@@ -35,8 +36,8 @@ exports.CMessage = function (buf) {
 
     this.dump = function() {
         if (true) {
-        console.log("raw:"+(this.buf).toString('hex'));
-        console.log("Version:"+this.version+"\n"+
+        dbg.dbg_print("raw:"+(this.buf).toString('hex'));
+        dbg.dbg_print("Version:"+this.version+"\n"+
                 "Type:"+this.type+"\n"+
                 "Length:"+this.length+"\n"+
                 "Data:"+(this.data).toString('hex'));

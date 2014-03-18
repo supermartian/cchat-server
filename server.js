@@ -1,5 +1,6 @@
 var serverPort = 8888;
 
+var dbg = require("./dbg.js");
 var m = require('./message.js');
 var u = require('./user.js');
 var WebSocketServer = require('ws').Server
@@ -15,13 +16,13 @@ function ab2str(buf) {
 wss.on('connection', function(ws) {
     /* Get this unique key from ws object. */
     var ws_key = (ws.upgradeReq.headers)['sec-websocket-key'];
-    console.log(Date.now() + ":key!!!!!!!!!!!!!!!:" + ws_key);
+    dbg.dbg_print("key is here: " + ws_key);
     ws.on('message', function(buf) {
         var msgBuf = new m.CMessage(new Buffer(buf));
         var errMsg = new m.ErrorMessage(new Buffer(5));
         errMsg.setHeader(0xfe, 5);
         errMsg.setErrno(0);
-        console.log(Date.now() + ":-----------incoming message----------");
+        dbg.dbg_print("Incoming message");
         msgBuf.dump();
         switch(msgBuf.type) {
             case 0x1:
@@ -39,7 +40,7 @@ wss.on('connection', function(ws) {
                     break;
                 } else {
                     var dup = false;
-                    console.log(Date.now() + "-------Here comes new user! " + cid + "------");
+                    dbg.dbg_print("Here comes a new user! " + "[" + cid + "]");
                     for (var i in userList) {
                         if (userList[i].id == cid) {
                             /* Found a duplicate user with same ID. */
@@ -83,7 +84,7 @@ wss.on('connection', function(ws) {
                 room.send(msgBuf.content);
                 break;
             default:
-                console.log(Date.now() + "yeah");
+                dbg.dbg_print("Unknown message type");
                 break;
         }
     });
@@ -97,8 +98,8 @@ wss.on('connection', function(ws) {
     });
 
     ws.on('error', function(reason, code) {
-        console.log('socket error: reason ' + reason + ', code ' + code);
-        console.log("still has:" + Object.keys(userList).length);
+        dbg.dbg_print("socket error: " + reason);
+        dbg.dbg_print("still has: " + Object.keys(userList).length);
     });
 });
 

@@ -24,7 +24,9 @@ ws.on('message', function(data, flags) {
     console.log("-----------incoming message----------");
     msgBuf.dump();
 });
-
+ws.on('error', function(reason, code) {
+    console.log('socket error: reason ' + reason + ', code ' + code);
+});
 
 var testMsg = function(ws, msg) {
     var message = msg;

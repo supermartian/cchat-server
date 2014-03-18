@@ -1,4 +1,5 @@
 var m = require('./message.js');
+var dbg = require("./dbg.js");
 
 exports.CUser = function (socket, id) {
     this.socket = socket;
