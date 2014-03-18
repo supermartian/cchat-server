@@ -11,7 +11,7 @@ function tb2str(buf) {
 
 exports.maxBufferLength = 2048;
 
-/* buf: ArrayBuffer */
+/* buf: Buffer */
 exports.CMessage = function (buf) {
     this.buf = buf;
     this.version = (this.buf)[0];
@@ -27,16 +27,19 @@ exports.CMessage = function (buf) {
     }
 
     this.send = function(socket) {
-        socket.send(this.buf, 'binary');
+        console.log(Date.now() + ":-----------outgoing message----------");
+        this.dump();
+        /* This has to be {binary: true, mask: true}, or an error with 1007 will occur. */
+        socket.send(this.buf, {binary: true, mask: true});
     }
 
     this.dump = function() {
         if (true) {
-        console.log("raw:"+ab2str(this.buf));
+        console.log("raw:"+(this.buf).toString('hex'));
         console.log("Version:"+this.version+"\n"+
                 "Type:"+this.type+"\n"+
                 "Length:"+this.length+"\n"+
-                "Data:"+ab2str(this.data));
+                "Data:"+(this.data).toString('hex'));
         }
     }
 }
@@ -56,10 +59,18 @@ exports.ChatMessage = function (buf) {
     exports.ChatMessage.super_.call(this, this.buf);
     this.content = (this.buf).slice(3);
 }
-exports.ErrorMessage = function (buf, buf) {
+exports.ErrorMessage = function (buf) {
     this.buf = buf;
     exports.ChatMessage.super_.call(this, this.buf);
     this.content = (this.buf).slice(3);
+
+    this.getErrno = function() {
+        return (this.buf).readUInt16BE(3);
+    }
+
+    this.setErrno = function(errno) {
+        (this.buf).writeUInt16BE(errno, 3);
+    }
 }
 util.inherits(exports.JoinMessage, exports.CMessage);
 util.inherits(exports.LeaveMessage, exports.CMessage);

@@ -40,7 +40,7 @@ exports.CRoom = function (id) {
         (new Buffer(message)).copy(msgBuf.content);
 
         for (var u in this.list) {
-            msgBuf.send((this.list)[u].socket, 'binary');
+            msgBuf.send((this.list)[u].socket);
         }
     }
 }

@@ -13,11 +13,15 @@ function ab2str(buf) {
 }
 
 wss.on('connection', function(ws) {
+    /* Get this unique key from ws object. */
     var ws_key = (ws.upgradeReq.headers)['sec-websocket-key'];
-    console.log("key!!!!!!!!!!!!!!!:" + ws_key);
+    console.log(Date.now() + ":key!!!!!!!!!!!!!!!:" + ws_key);
     ws.on('message', function(buf) {
         var msgBuf = new m.CMessage(new Buffer(buf));
-        console.log("-----------incoming message----------");
+        var errMsg = new m.ErrorMessage(new Buffer(5));
+        errMsg.setHeader(0xfe, 5);
+        errMsg.setErrno(0);
+        console.log(Date.now() + ":-----------incoming message----------");
         msgBuf.dump();
         switch(msgBuf.type) {
             case 0x1:
@@ -28,13 +32,17 @@ wss.on('connection', function(ws) {
                 var user, room;
 
                 if (userList[ws_key]) {
+                    /* A user with a same websocket key is here. */
+                    errMsg.setErrno(0x4);
+                    errMsg.send(ws);
                     ws.close();
                     break;
                 } else {
                     var dup = false;
-                    console.log("-------Here comes new user! " + cid + "------");
+                    console.log(Date.now() + "-------Here comes new user! " + cid + "------");
                     for (var i in userList) {
                         if (userList[i].id == cid) {
+                            /* Found a duplicate user with same ID. */
                             dup = true;
                             break;
                         }
@@ -43,6 +51,9 @@ wss.on('connection', function(ws) {
                     if (!dup) {
                         userList[ws_key] = new u.CUser(ws, cid);
                     } else {
+                        /* A user with a same id is here. */
+                        errMsg.setErrno(0x4);
+                        errMsg.send(ws);
                         ws.close();
                         break;
                     }
@@ -56,10 +67,13 @@ wss.on('connection', function(ws) {
                 }
                 userList[ws_key].setRoom(rid);
                 room.add(userList[ws_key]);
+                errMsg.send(ws);
                 break;
             case 0x2:
                 /* Leave */
                 CRoom.del(userList[ws_key].id)
+                errMsg.send(ws);
+                ws.close();
                 break;
             case 0x4:
                 /* Chat */
@@ -69,7 +83,7 @@ wss.on('connection', function(ws) {
                 room.send(msgBuf.content);
                 break;
             default:
-                console.log("yeah");
+                console.log(Date.now() + "yeah");
                 break;
         }
     });
