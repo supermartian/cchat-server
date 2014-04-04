@@ -5,10 +5,10 @@
 All data transmission is in websocket binary mode.
 
 ### Specification
-#### Ver 0.1
+#### Ver 0.2
 ##### What's in this version
 
-Provide basic chatroom functionalities. Encryption is not introduced.
+Provide Key Exchange and basic message functionalities. Encryption is still not introduced.
 
 ##### General Specification
 
@@ -42,6 +42,43 @@ The message declares the client's identity and the chatroom it supposes to join.
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+--+-+-+
     |Ver= 1 |Padding| Type = 0x1    |Length         | Client's ID(SHA-1, 320bits, in hex ascii) | Chatroom's ID(SHA-1, 320bits, in hex ascii) |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+###### Key neogotiation
+
+    0                   1                   2                   3   
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 ..........
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+--+-+-+-+-+-+-+-+-+-+
+    |Ver= 1 |Padding| Type = 0x10   | NUMBER P 
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+--+-+-+-+-+-
+
+Direction: S->C
+Definition: The server sends this message to indicate the number P for modular
+computation. (g^x mod p)
+
+    0                   1                   2                   3   
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 ..........
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+--+-+-+-+-+-+-+-+-+-+
+    |Ver= 1 |Padding| Type = 0x11   | Rounds left | Key Intermediate  |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+--+-+-+-+-+-
+
+Direction: S->C
+Definition: Anytime the server wants to re-neogotiate the key, this mesage is sent.
+When the client receives this message, it must perform (intermediate)^(secret) mod P. If
+rounds left isn't 0, the client must return the result to the server. However, when this
+field is 0, it means that the result of the computation can be used for key now.
+
+When this message comes to the client, it always indicates that current key is invalid. Clients
+should stop sending message in this situation.
+
+    0                   1                   2                   3   
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 ..........
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+--+-+-+-+-+-+-+-+-+-+
+    |Ver= 1 |Padding| Type = 0x12   | Rounds left | Key Intermediate  |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+--+-+-+-+-+-
+
+Direction: C->S
+Definition: When the client finished the computation of modular operation, this message
+is sent to server. When Rounds left is 0, the client MUST leave Key Intermediate blank.
 
 ###### Leave 
 
@@ -98,4 +135,5 @@ Error codes:
 - 0x6: You are kicked from the chatroom.
 - 0x6: You are kicked from the server due to no join after connection.
 - 0x8: Wrong message type.
+- 0x10: Key neogotition is not finished, no futher message is allowed to be sent.
 - 0xbeef: Unknown error.
