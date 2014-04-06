@@ -9,7 +9,7 @@ All data transmission is in websocket binary mode.
 ##### What's in this version
 
 Provide Key Exchange and basic message functionalities. Encryption is still not introduced.
-Use JSON.
+Use JSON as default message format.
 
 ##### Types of messages:
 
