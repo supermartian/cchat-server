@@ -1,4 +1,3 @@
-var m = require('./message.js');
 var dbg = require("./dbg.js");
 
 exports.CUser = function (socket, id) {
@@ -31,17 +30,13 @@ exports.CRoom = function (id) {
         delete (this.list[id]);
     }
 
-    this.send = function(message) {
+    this.send = function(message, ws) {
         /* Construct the message */
-        var buf = new Buffer(message.length + 3);
-        var msgBuf = new m.ChatMessage(buf);
-        msgBuf.version[0] = 1 << 4; 
-        msgBuf.setHeader(0x5, message.length + 3);
+        message.type = "message_1";
+        var msgstr = JSON.stringify(message);
         var i = 0;
-        (new Buffer(message)).copy(msgBuf.content);
-
         for (var u in this.list) {
-            msgBuf.send((this.list)[u].socket);
+            (this.list)[u].socket.send(msgstr);
         }
     }
 }

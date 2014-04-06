@@ -89,7 +89,7 @@ C->S:
     {
         ver: 1,
         type: message_0,
-        content: (IN BASE64)
+        content: (STRING)
     }
 
 S->C:
@@ -97,7 +97,7 @@ S->C:
     {
         ver: 1,
         type: message_1,
-        content: (IN BASE64)
+        content: (STRING)
     }
 
 ###### Error 
@@ -122,3 +122,4 @@ Error codes:
 - 0x6: You are kicked from the server due to no join after connection.
 - 0x8: Wrong message type.
 - 0x10: Key neogotition is not finished, no futher message is allowed to be sent.
+- 0xbeef: Unknown error.

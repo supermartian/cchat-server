@@ -1,7 +1,6 @@
 var serverPort = 8888;
 
 var dbg = require("./dbg.js");
-var m = require('./message.js');
 var u = require('./user.js');
 var WebSocketServer = require('ws').Server
   , wss = new WebSocketServer({port: 8888, noServer: true});
@@ -18,24 +17,36 @@ wss.on('connection', function(ws) {
     var ws_key = (ws.upgradeReq.headers)['sec-websocket-key'];
     dbg.dbg_print("key is here: " + ws_key);
     ws.on('message', function(buf) {
-        var msgBuf = new m.CMessage(new Buffer(buf));
-        var errMsg = new m.ErrorMessage(new Buffer(5));
-        errMsg.setHeader(0xfe, 5);
-        errMsg.setErrno(0);
+        var errMsg = {ver:1, type:'error', errcode:0};
+        var msg;
+        try {
+            msg = JSON.parse(buf);
+        } catch (e) {
+            errMsg.errcode = 0xbeef;
+            ws.send(JSON.stringify(errMsg));
+            dbg.dbg_print("ERROR" + e);
+            return;
+        }
         dbg.dbg_print("Incoming message");
-        msgBuf.dump();
-        switch(msgBuf.type) {
-            case 0x1:
+        dbg.dbg_print(JSON.stringify(msg));
+
+        if (msg.type == undefined) {
+            errMsg.errcode = 0xbeef;
+            ws.send(JSON.stringify(errMsg));
+            return;
+        }
+
+        switch(msg.type) {
+            case "join":
                 /* Join */
-                msgBuf = new m.JoinMessage(buf);
-                var rid = (msgBuf.rid).toString();
-                var cid = (msgBuf.cid).toString();
+                var rid = msg.chatroom;
+                var cid = msg.clientid;
                 var user, room;
 
                 if (userList[ws_key]) {
                     /* A user with a same websocket key is here. */
-                    errMsg.setErrno(0x4);
-                    errMsg.send(ws);
+                    errMsg.errcode = 0x4;
+                    ws.send(JSON.stringify(errMsg));
                     ws.close();
                     break;
                 } else {
@@ -53,8 +64,8 @@ wss.on('connection', function(ws) {
                         userList[ws_key] = new u.CUser(ws, cid);
                     } else {
                         /* A user with a same id is here. */
-                        errMsg.setErrno(0x4);
-                        errMsg.send(ws);
+                        errMsg.errcode = 0x4;
+                        ws.send(JSON.stringify(errMsg));
                         ws.close();
                         break;
                     }
@@ -67,24 +78,27 @@ wss.on('connection', function(ws) {
                     room = roomList[rid];
                 }
                 userList[ws_key].setRoom(rid);
-                room.add(userList[ws_key]);
-                errMsg.send(ws);
+                room.add(userList[ws_key]); /* Here adds the new user! */
+                ws.send(JSON.stringify(errMsg));
                 break;
-            case 0x2:
+            case "leave":
                 /* Leave */
                 CRoom.del(userList[ws_key].id)
-                errMsg.send(ws);
+                ws.send(JSON.stringify(errMsg));
                 ws.close();
                 break;
-            case 0x4:
+            case "message_0":
                 /* Chat */
-                msgBuf = new m.ChatMessage(buf);
                 var user = userList[ws_key];
                 var room = roomList[user.getRoom()];
-                room.send(msgBuf.content);
+                if (room != undefined) {
+                    room.send(msg, ws);
+                }
                 break;
             default:
                 dbg.dbg_print("Unknown message type");
+                errMsg.errcode = 0x8;
+                ws.send(JSON.stringify(errMsg));
                 break;
         }
     });
@@ -92,6 +106,7 @@ wss.on('connection', function(ws) {
     ws.on('close', function(){
         var user = userList[ws_key];
         if (user != undefined) {
+            dbg.dbg_print("A user is leaving: " + user.id);
             roomList[user.getRoom()].del(user.id);
             delete userList[ws_key];
         }
@@ -102,8 +117,3 @@ wss.on('connection', function(ws) {
         dbg.dbg_print("still has: " + Object.keys(userList).length);
     });
 });
-
-
-function sendMessage(socket, type, data) {
-    var buf = new Uint8Array(maxBufferLength);
-}
