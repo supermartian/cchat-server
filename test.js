@@ -11,10 +11,11 @@ function tb2str(buf) {
 ws.on('open', function() {
     /* Test Join */
     testJoin(ws, Math.random().toString(), "room1");
+    for (var i = 0; i < 10; i++){
     /* Test Message */
     testMsg(ws, "yes");
     /* Test Message */
-    testMsg(ws, "no");
+    testMsg(ws, "no");}
     /* Test Message */
     testMsg(ws, "a long long long long message" + Math.random().toString());
     /* Test Message */
