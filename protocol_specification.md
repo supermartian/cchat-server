@@ -43,7 +43,9 @@ computation. (g^x mod p)
         ver: 1,
         type: keyxchg_1,
         roundleft: (REMAINING ROUNDS),
-        keyintrmdt: (KEY INTERMEDIATE, in hex ASCII)
+        changesecret: {true | false},
+        keyintrmdt: (KEY INTERMEDIATE, in hex ASCII),
+        prime: (P, in hex ASCII)
     }
 
 Direction: S->C
@@ -54,6 +56,8 @@ field is 0, it means that the result of the computation can be used for key now.
 
 When this message comes to the client, it always indicates that current key is invalid. Clients
 should stop sending message in this situation.
+
+If changesecret is set to be true, the client then MUST change its secret to a different one, then use the new secret to compute the intermediate.
 
     {
         ver: 1,
