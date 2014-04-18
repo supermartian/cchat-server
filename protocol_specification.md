@@ -31,16 +31,6 @@ The message declares the client's identity and the chatroom it supposes to join.
 
     {
         ver: 1,
-        type: keyxchg_0,
-        number: (P, in hex ASCII)
-    }
-
-Direction: S->C
-Definition: The server sends this message to indicate the number P for modular
-computation. (g^x mod p)
-
-    {
-        ver: 1,
         type: keyxchg_1,
         roundleft: (REMAINING ROUNDS),
         changesecret: {true | false},

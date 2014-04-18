@@ -76,9 +76,9 @@ exports.CRoom = function (id) {
     this.roompublic = undefined;
 
     var df = crypto.createDiffieHellman(512);
-    this.prime = df.getPrime("hex"); 
+    this.prime = df.getPrime("hex");
 
-    df.generateKeys("hex"); 
+    df.generateKeys("hex");
     this.roompublic = "02";
 
     this.add = function(user) {
@@ -91,7 +91,7 @@ exports.CRoom = function (id) {
         }
         this.newuser = user;
 
-        user.setAuthRound(1);
+        user.setAuthRound(2);
         this.newuser.requestAuth(this.roompublic, true, this.prime);
         this.newuser.setAuthRound(this.newuser.authrounds-1);
 
@@ -99,10 +99,10 @@ exports.CRoom = function (id) {
         var sent = true;
         for (var u in this.list) {
             var u = (this.list)[u];
-            u.setAuthRound(0);
+            u.setAuthRound(1);
             // Only needs to send to one of the existing users.
             if (sent) {
-                u.setAuthRound(1);
+                u.setAuthRound(2);
                 u.requestAuth(this.roompublic, false, this.prime);
                 u.setAuthRound(u.authrounds-1);
                 sent = false;

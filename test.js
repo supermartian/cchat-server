@@ -50,7 +50,7 @@ var testJoin = function(ws, name, room) {
 var testDiffieHellman = function(ws, msg) {
     if (df == undefined) {
         df = crypto.createDiffieHellman(msg.prime, "hex");
-        df.generateKeys(); 
+        df.generateKeys();
         secret = df.getPrivateKey("hex");
     }
 
@@ -66,7 +66,7 @@ var testDiffieHellman = function(ws, msg) {
         ver:1,
         type:"keyxchg_2",
         roundleft:msg.roundleft,
-        keyintrmdt: intr 
+        keyintrmdt: intr
     };
 
     ws.send(JSON.stringify(ret));

@@ -141,15 +141,15 @@ function handle_keyxchg_2(msg, ws) {
 
     if (user != room.newuser && room.newuser != undefined) {
         uu = room.newuser;
-        uu.requestAuth(msg.keyintrmdt, false, room.prime);
         uu.setAuthRound(uu.authrounds-1);
+        uu.requestAuth(msg.keyintrmdt, false, room.prime);
     } else if (room.newuser != undefined) {
         for (var u in room.list) {
             var nu = (room.list)[u];
             if (nu == room.newuser)
                 continue;
-            nu.requestAuth(msg.keyintrmdt, false, room.prime);
             nu.setAuthRound(nu.authrounds-1);
+            nu.requestAuth(msg.keyintrmdt, false, room.prime);
         }
     }
 }
