@@ -75,7 +75,7 @@ exports.CRoom = function (id) {
     this.newuser = undefined;
     this.roompublic = undefined;
 
-    var df = crypto.createDiffieHellman(512);
+    var df = crypto.createDiffieHellman(192);
     this.prime = df.getPrime("hex");
 
     df.generateKeys("hex");
