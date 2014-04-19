@@ -93,18 +93,19 @@ exports.CRoom = function (id) {
 
         user.setAuthRound(1);
         this.newuser.requestAuth(this.roompublic, true, this.prime);
+        user.setAuthRound(0);
 
         this.keyready = 2;
         var sent = true;
         for (var u in this.list) {
             var u = (this.list)[u];
-            u.setAuthRound(1);
             // Only needs to send to one of the existing users.
             if (sent) {
                 u.setAuthRound(1);
                 u.requestAuth(this.roompublic, false, this.prime);
                 sent = false;
             }
+            u.setAuthRound(0);
         }
 
         (this.list)[user.id] = user;

@@ -139,17 +139,26 @@ function handle_keyxchg_2(msg, ws) {
     var room = roomList[user.getRoom()];
     var uu;
 
+    console.log("user:  "+ws_key);
     if (user != room.newuser && room.newuser != undefined) {
         uu = room.newuser;
-        uu.setAuthRound(uu.authrounds-1);
         uu.requestAuth(msg.keyintrmdt, false, room.prime);
+        if (uu.authrounds > 0) {
+            uu.setAuthRound(uu.authrounds-1);
+        }
+    console.log("auser:  "+ws_key);
     } else if (room.newuser != undefined) {
+    console.log("buser:  "+ws_key);
         for (var u in room.list) {
             var nu = (room.list)[u];
+    console.log("cuser:  "+ws_key);
             if (nu == room.newuser)
                 continue;
-            nu.setAuthRound(nu.authrounds-1);
+    console.log("duser:  "+ws_key);
             nu.requestAuth(msg.keyintrmdt, false, room.prime);
+            if (nu.authrounds > 0) {
+                nu.setAuthRound(nu.authrounds-1);
+            }
         }
     }
 }
