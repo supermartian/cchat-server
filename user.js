@@ -91,9 +91,8 @@ exports.CRoom = function (id) {
         }
         this.newuser = user;
 
-        user.setAuthRound(2);
+        user.setAuthRound(1);
         this.newuser.requestAuth(this.roompublic, true, this.prime);
-        this.newuser.setAuthRound(this.newuser.authrounds-1);
 
         this.keyready = 2;
         var sent = true;
@@ -102,9 +101,8 @@ exports.CRoom = function (id) {
             u.setAuthRound(1);
             // Only needs to send to one of the existing users.
             if (sent) {
-                u.setAuthRound(2);
+                u.setAuthRound(1);
                 u.requestAuth(this.roompublic, false, this.prime);
-                u.setAuthRound(u.authrounds-1);
                 sent = false;
             }
         }
