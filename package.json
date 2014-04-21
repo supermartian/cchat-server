@@ -1,0 +1,9 @@
+{
+  "author": "Yuzhong Wen <supermartian@gmail.com>",
+  "name": "cchat-server",
+  "description": "An online anonymous chat system with encryption which insures the anonymity and security among the participants",
+  "version": "0.1.0",
+  "dependencies": {
+    "ws": "0.4.31"
+  }
+}
