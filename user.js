@@ -1,20 +1,6 @@
 var dbg = require("./dbg.js");
 var crypto = require("crypto");
-
-UserTreeNode = function() {
-    this.val;
-    this.isLeaf = false;
-}
-
-UserTree = function () {
-    this.n = 0;
-    this.nodes = new Array();
-
-    this.add = function(node) {
-
-        n++;
-    }
-}
+var dflength = 192;
 
 exports.CUser = function (socket, id) {
     this.socket = socket;
@@ -70,12 +56,11 @@ exports.CUser = function (socket, id) {
 exports.CRoom = function (id) {
     this.id = id;
     this.list = new Array();
-    this.tree = new UserTree();
     this.keyready = 2;
     this.newuser = undefined;
     this.roompublic = undefined;
 
-    var df = crypto.createDiffieHellman(192);
+    var df = crypto.createDiffieHellman(dflength);
     this.prime = df.getPrime("hex");
 
     df.generateKeys("hex");

@@ -89,6 +89,15 @@ function handle_leave(ws, close) {
         ws.close();
     }
 
+    var objdup;
+    for (var u in room.list) {
+        var u = (room.list)[u];
+        objdup = u;
+        room.del(u.id);
+        room.add(objdup);
+        break;
+    }
+
     dbg.dbg_print("Leaving:" + ws_key);
 }
 
