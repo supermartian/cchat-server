@@ -1,14 +1,10 @@
 ## cchat protocol specification
 
-### Note
-
-All data transmission is in websocket binary mode.
-
 ### Specification
-#### Ver 0.3
+#### Ver 1.0
 ##### What's in this version
 
-Provide Key Exchange and basic message functionalities. Encryption is still not introduced.
+Provide Key Exchange and basic message functionalities. Key exchange is defined.
 Use JSON as default message format.
 
 ##### Types of messages:
